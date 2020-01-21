@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include "ram.h"
 
@@ -22,17 +23,50 @@ unsigned int PC = 0; // program counter
  * (Negative, oVerflow, unused, Break, Decimal, Interrupt, Zero, Carry)
  */
 
+void set_flag(unsigned int bit_n, bool value)
+{
+	if (value == 1) {
+		P |= 1 << bit_n;
+	} else {
+		P &= ~(1 << bit_n);
+	}
+}
+
+bool get_flag(unsigned int bit_n) 
+{
+	return (P >> bit_n) & 1;
+}
+
 
 int tick()
+// a single clock cycle
 {
-
 	return 0;
 }
 
 
 int main() {
+	bool b;
 	initialize_memory();
-	printf("hello\n");
+	/* Test setting and getting flags */
+	b = get_flag(0); // 0
+	printf("%d", b);
+
+	b = get_flag(5); // 1
+	printf("%d", b);
+
+	set_flag(7, 1);
+	b = get_flag(7); // 1
+	printf("%d", b);
+
+	set_flag(7, 0);
+	b = get_flag(7); // 0
+	printf("%d", b);
+
+	// Expected output: 0110
+
+
+	printf("\n");
 	return 0;
 }
 
