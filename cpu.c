@@ -23,6 +23,9 @@ unsigned int PC = 0; // program counter
  * (Negative, oVerflow, unused, Break, Decimal, Interrupt, Zero, Carry)
  */
 
+unsigned int cycles = 0;
+
+
 void set_flag(unsigned int bit_n, bool value)
 {
 	if (value == 1) {
@@ -37,11 +40,57 @@ bool get_flag(unsigned int bit_n)
 	return (P >> bit_n) & 1;
 }
 
-
 int tick()
 // a single clock cycle
 {
-	return 0;
+	if (cycles > 0) {
+			cycles -= 1;
+			return -1; // instruction in progress
+	}
+	unsigned char instruction = read(PC);
+	unsigned char M;
+
+	switch (instruction) {
+		case 0x0000: // BRK impl
+			//TODO
+			break;
+		case 0x0001: // ORA X, ind
+			//TODO
+			break;
+		case 0x0005: // ORA zpg
+			//TODO
+			break;
+		case 0x0006: // ASL zpg
+			//TODO
+			break;
+		case 0x0008: // PHP impl
+			//TODO
+			break;
+
+		case 0x0009: // ORA #
+			increment_PC();
+			M = read(PC);
+			A |= M;
+			set_flag(7, A >> 7);
+			set_flag(1, A == 0);
+			cycles = 1;
+			break;
+
+		case 0x000A: // ASL A
+			//TODO
+			break;
+		case 0x000D: // ORA abs
+			//TODO
+			break;
+		case 0x000E: // ASL abs
+			//TODO
+			break;
+		default:
+			break;
+	}
+
+	increment_PC();
+	return 0; // instruction complete
 }
 
 
