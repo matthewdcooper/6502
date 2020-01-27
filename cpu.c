@@ -9,7 +9,7 @@
 unsigned char A = 0; // accumulator
 unsigned char X = 0; // index X
 unsigned char Y = 0; // index Y
-unsigned char S = 0; // stack pointer
+unsigned char S = 0xFF; // stack pointer
 unsigned char P = 32; // status (uses only 7 bits)
 unsigned int PC = 0; // program counter
 
@@ -26,6 +26,23 @@ unsigned int PC = 0; // program counter
 unsigned int cycles = 0;
 
 
+/* STACK HELPERS */
+void push(unsigned char data) {
+	unsigned int address = 0x0100 + S;
+	write(address, data);
+	S -= 1;
+}
+
+
+unsigned char pull() {
+	unsigned int address = 0x0100 + S;
+	unsigned char data = read(address);
+	S += 1;
+	return data;
+}
+
+
+/* FLAG HELPERS */
 void set_flag(unsigned int bit_n, bool value)
 {
 	if (value == 1) {
@@ -35,10 +52,12 @@ void set_flag(unsigned int bit_n, bool value)
 	}
 }
 
+
 bool get_flag(unsigned int bit_n) 
 {
 	return (P >> bit_n) & 1;
 }
+
 
 int tick()
 // a single clock cycle
