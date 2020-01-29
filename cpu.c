@@ -97,8 +97,13 @@ int tick()
 			break;
 
 		case 0x05: // ORA zpg
-			//TODO
+			M = read(0x0000 + (unsigned int) read(PC++));
+			A = A | M;
+			set_flag(7, A >> 7);
+			set_flag(1, A == 0);
+			cycles = 2;
 			break;
+
 		case 0x06: // ASL zpg
 			//TODO
 			break;
