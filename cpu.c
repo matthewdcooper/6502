@@ -66,18 +66,19 @@ int tick()
 			cycles -= 1;
 			return -1; // instruction in progress
 	}
-	unsigned char instruction = read(PC);
+	unsigned char instruction = read(PC++);
 	unsigned char M;
 
 	switch (instruction) {
 		case 0x00: // BRK impl
 			//TODO
-			/* 1. program counter second byte after BRK is pushed.
-			 * 2. status pushed
-			 * 3. program counter = 0xffff fffe
-			 *  what is interrupt vector routine?
-			 *
-			 */
+			set_flag(4, 1);
+			push((unsigned char) PC >> 8);
+			push((unsigned char) PC & 0xff);
+			push(P); 
+			unsigned char lo = read((unsigned int) 0xfffe);
+			unsigned char hi = read((unsigned int) 0xffff);
+			PC = (unsigned int) hi << 8 + (unsigned int) lo;
 			break;
 		case 0x01: // ORA X, ind
 			//TODO
@@ -93,8 +94,7 @@ int tick()
 			break;
 
 		case 0x09: // ORA #
-			increment_PC();
-			M = read(PC);
+			M = read(PC++);
 			A |= M;
 			set_flag(7, A >> 7);
 			set_flag(1, A == 0);
@@ -114,7 +114,6 @@ int tick()
 			break;
 	}
 
-	increment_PC();
 	return 0; // instruction complete
 }
 
