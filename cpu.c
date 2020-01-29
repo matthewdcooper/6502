@@ -70,23 +70,29 @@ int tick()
 	unsigned char M;
 
 	switch (instruction) {
-		case 0x0000: // BRK impl
+		case 0x00: // BRK impl
+			//TODO
+			/* 1. program counter second byte after BRK is pushed.
+			 * 2. status pushed
+			 * 3. program counter = 0xffff fffe
+			 *  what is interrupt vector routine?
+			 *
+			 */
+			break;
+		case 0x01: // ORA X, ind
 			//TODO
 			break;
-		case 0x0001: // ORA X, ind
+		case 0x05: // ORA zpg
 			//TODO
 			break;
-		case 0x0005: // ORA zpg
+		case 0x06: // ASL zpg
 			//TODO
 			break;
-		case 0x0006: // ASL zpg
-			//TODO
-			break;
-		case 0x0008: // PHP impl
+		case 0x08: // PHP impl
 			//TODO
 			break;
 
-		case 0x0009: // ORA #
+		case 0x09: // ORA #
 			increment_PC();
 			M = read(PC);
 			A |= M;
@@ -95,13 +101,13 @@ int tick()
 			cycles = 1;
 			break;
 
-		case 0x000A: // ASL A
+		case 0x0A: // ASL A
 			//TODO
 			break;
-		case 0x000D: // ORA abs
+		case 0x0D: // ORA abs
 			//TODO
 			break;
-		case 0x000E: // ASL abs
+		case 0x0E: // ASL abs
 			//TODO
 			break;
 		default:
