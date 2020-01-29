@@ -115,8 +115,12 @@ int tick()
 			cycles = 4;
 			break;
 
+		case 0x07: // undefined
+			break;
+
 		case 0x08: // PHP impl
-			//TODO
+			push(P);
+			cycles = 2;
 			break;
 
 		case 0x09: // ORA #
