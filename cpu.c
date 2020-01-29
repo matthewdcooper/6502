@@ -70,8 +70,8 @@ int tick()
 	unsigned char M;
 
 	switch (instruction) {
+
 		case 0x00: // BRK impl
-			//TODO
 			set_flag(4, 1);
 			push((unsigned char) PC >> 8);
 			push((unsigned char) PC & 0xff);
@@ -79,10 +79,23 @@ int tick()
 			unsigned char lo = read((unsigned int) 0xfffe);
 			unsigned char hi = read((unsigned int) 0xffff);
 			PC = (unsigned int) hi << 8 + (unsigned int) lo;
+			cycles = 6;
 			break;
+
 		case 0x01: // ORA X, ind
-			//TODO
+			unsigned int hi = (unsigned int) read(PC++) << 8;
+			M = read(hi + (unsigned int) X);
+			A = A | M;
+			set_flag(7, A >> 7);
+			set_flag(1, A == 0);
+			cycles = 5;
 			break;
+
+		case 0x02: // undefined
+		case 0x03:
+		case 0x04:
+			break;
+
 		case 0x05: // ORA zpg
 			//TODO
 			break;
