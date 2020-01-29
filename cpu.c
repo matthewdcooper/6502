@@ -105,8 +105,16 @@ int tick()
 			break;
 
 		case 0x06: // ASL zpg
-			//TODO
+			unsigned int address = 0x0000 + (unsigned int) read(PC++);
+			M = read(address);
+			unsigned char data = M << 1;
+			write(address, data);
+			set_flag(7, data >> 7);
+			set_flag(1, M == 0);
+			set_flag(0, M >> 7);
+			cycles = 4;
 			break;
+
 		case 0x08: // PHP impl
 			//TODO
 			break;
