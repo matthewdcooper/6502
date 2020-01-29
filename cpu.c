@@ -132,8 +132,13 @@ int tick()
 			break;
 
 		case 0x0A: // ASL A
-			//TODO
+			set_flag(0, A >> 7);
+			A = A << 1;
+			set_flag(7, A >> 7);
+			set_flag(1, A == 0);
+			cycles = 1;
 			break;
+
 		case 0x0D: // ORA abs
 			//TODO
 			break;
