@@ -23,7 +23,7 @@ unsigned int PC = 0; // program counter
  * (Negative, oVerflow, unused, Break, Decimal, Interrupt, Zero, Carry)
  */
 
-unsigned int cycles = 0;
+unsigned int CYCLES = 0;
 
 
 /* STACK HELPERS */
@@ -42,9 +42,28 @@ unsigned char pull() {
 }
 
 
+
 /* FLAG HELPERS */
-void set_flag(unsigned int bit_n, bool value)
+
+int flag_to_bit(unsigned char flag) {
+	switch (flag) {
+		case 'N': return 7;
+		case 'V': return 6;
+		case 'B': return 4;
+		case 'D': return 3;
+		case 'I': return 2;
+		case 'Z': return 1;
+		case 'C': return 0;
+
+		default:
+			  printf("Invalid flag: %c\n", flag);
+			  return -1;
+	}
+}
+
+void set_flag(unsigned char flag, bool value)
 {
+	int bit_n = flag_to_bit(flag);
 	if (value == 1) {
 		P |= 1 << bit_n;
 	} else {
@@ -53,42 +72,54 @@ void set_flag(unsigned int bit_n, bool value)
 }
 
 
-bool get_flag(unsigned int bit_n) 
+bool get_flag(unsigned char flag) 
 {
+	int bit_n = flag_to_bit(flag);
 	return (P >> bit_n) & 1;
 }
 
 
+/* EMULATOR */
 int tick()
 // a single clock cycle
 {
-	if (cycles > 0) {
-			cycles -= 1;
+
+	unsigned char instruction;
+	unsigned char M;
+	unsigned char lo;
+	unsigned char hi;
+	unsigned char data;
+	unsigned int address;
+
+	// If an instruction hasn't completed its CYCLES, then tick silently.
+	if (CYCLES > 0) {
+			CYCLES -= 1;
 			return -1; // instruction in progress
 	}
-	unsigned char instruction = read(PC++);
-	unsigned char M;
 
+
+	// Fetch and Execute
+	instruction = read(PC++);
 	switch (instruction) {
 
 		case 0x00: // BRK impl
-			set_flag(4, 1);
+			set_flag('B', 1);
 			push((unsigned char) PC >> 8);
 			push((unsigned char) PC & 0xff);
 			push(P); 
-			unsigned char lo = read((unsigned int) 0xfffe);
-			unsigned char hi = read((unsigned int) 0xffff);
+			lo = read((unsigned int) 0xfffe);
+			hi = read((unsigned int) 0xffff);
 			PC = (unsigned int) hi << 8 + (unsigned int) lo;
-			cycles = 6;
+			CYCLES = 6;
 			break;
 
 		case 0x01: // ORA X, ind
-			unsigned int hi = (unsigned int) read(PC++) << 8;
+			hi = (unsigned int) read(PC++) << 8;
 			M = read(hi + (unsigned int) X);
-			A = A | M;
-			set_flag(7, A >> 7);
-			set_flag(1, A == 0);
-			cycles = 5;
+			A |= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 5;
 			break;
 
 		case 0x02: // undefined
@@ -98,21 +129,21 @@ int tick()
 
 		case 0x05: // ORA zpg
 			M = read(0x0000 + (unsigned int) read(PC++));
-			A = A | M;
-			set_flag(7, A >> 7);
-			set_flag(1, A == 0);
-			cycles = 2;
+			A |= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 2;
 			break;
 
 		case 0x06: // ASL zpg
-			unsigned int address = 0x0000 + (unsigned int) read(PC++);
+			address = 0x0000 + (unsigned int) read(PC++);
 			M = read(address);
-			unsigned char data = M << 1;
+			data = M << 1;
 			write(address, data);
-			set_flag(7, data >> 7);
-			set_flag(1, M == 0);
-			set_flag(0, M >> 7);
-			cycles = 4;
+			set_flag('N', data >> 7);
+			set_flag('Z', M == 0);
+			set_flag('C', M >> 7);
+			CYCLES = 4;
 			break;
 
 		case 0x07: // undefined
@@ -120,28 +151,40 @@ int tick()
 
 		case 0x08: // PHP impl
 			push(P);
-			cycles = 2;
+			CYCLES = 2;
 			break;
 
 		case 0x09: // ORA #
 			M = read(PC++);
 			A |= M;
-			set_flag(7, A >> 7);
-			set_flag(1, A == 0);
-			cycles = 1;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 1;
 			break;
 
 		case 0x0A: // ASL A
-			set_flag(0, A >> 7);
-			A = A << 1;
-			set_flag(7, A >> 7);
-			set_flag(1, A == 0);
-			cycles = 1;
+			set_flag('C', A >> 7);
+			A <<= 1;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 1;
+			break;
+
+		case 0x0B: // undefined
+		case 0x0C:
 			break;
 
 		case 0x0D: // ORA abs
-			//TODO
+			lo = read(PC++);
+			hi = read(PC++);
+			address = ((unsigned int) hi << 8) + (unsigned int) lo;
+			M = read(address);
+			A |= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 3;
 			break;
+
 		case 0x0E: // ASL abs
 			//TODO
 			break;
@@ -157,21 +200,18 @@ int main() {
 	bool b;
 	initialize_memory();
 	/* Test setting and getting flags */
-	b = get_flag(0); // 0
+	b = get_flag('C'); // 0
 	printf("%d", b);
 
-	b = get_flag(5); // 1
+	set_flag('N', 1);
+	b = get_flag('N'); // 1
 	printf("%d", b);
 
-	set_flag(7, 1);
-	b = get_flag(7); // 1
+	set_flag('N', 0);
+	b = get_flag('N'); // 0
 	printf("%d", b);
 
-	set_flag(7, 0);
-	b = get_flag(7); // 0
-	printf("%d", b);
-
-	// Expected output: 0110
+	// Expected output: 010
 
 
 	printf("\n");
