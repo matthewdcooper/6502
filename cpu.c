@@ -186,8 +186,21 @@ int tick()
 			break;
 
 		case 0x0E: // ASL abs
-			//TODO
+			lo = read(PC++);
+			hi = read(PC++);
+			address = ((unsigned int) hi << 8) + (unsigned int) lo;
+			M = read(address);
+			data = M << 1;
+			write(address, data);
+			set_flag('N', data >> 7);
+			set_flag('Z', M == 0);
+			set_flag('C', M >> 7);
+			CYCLES = 5;
 			break;
+
+		case 0x0F: // undefined
+			break;
+
 		default:
 			break;
 	}
