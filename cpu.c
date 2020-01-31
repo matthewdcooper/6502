@@ -209,24 +209,14 @@ int tick()
 }
 
 
-int main() {
-	bool b;
+int main(int argc, char *argv[]) {
 	initialize_memory();
-	/* Test setting and getting flags */
-	b = get_flag('C'); // 0
-	printf("%d", b);
-
-	set_flag('N', 1);
-	b = get_flag('N'); // 1
-	printf("%d", b);
-
-	set_flag('N', 0);
-	b = get_flag('N'); // 0
-	printf("%d", b);
-
-	// Expected output: 010
-
-
+	if (argc == 2) {
+		load_program(argv[1]);
+	}
+	for (int i = 0; i < 8; i++) {
+		printf("%d ", read(i));
+	}
 	printf("\n");
 	return 0;
 }
