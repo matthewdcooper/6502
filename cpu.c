@@ -201,6 +201,30 @@ int tick()
 		case 0x0F: // undefined
 			break;
 
+		case 0x10: // BPL rel
+			data = read(PC++);
+			if (get_flag('N') == 0) {
+					hi = PC >> 8;
+					PC += data;
+					CYCLES = 2; // +1 if page boundary crossed
+					if (PC >> 8 != hi) CYCLES += 1;
+			} else {
+				CYCLES = 1; 
+			}
+			break;
+
+		case 0x11: // ORA ind, Y
+			address = read(read(PC++))
+			lo = read(address);
+			hi = read(address+1);
+			address = hi << 8 + lo + Y;
+			M = read(address);
+			A |= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 4; // TODO: +1 if page boundary crossed
+			if (address >> 8 != hi) CYCLES += 1;
+
 		default:
 			break;
 	}
@@ -211,9 +235,7 @@ int tick()
 
 int main(int argc, char *argv[]) {
 	initialize_memory();
-	if (argc == 2) {
-		load_program(argv[1]);
-	}
+	if (argc == 2) load_program(argv[1]);
 	for (int i = 0; i < 8; i++) {
 		printf("%d ", read(i));
 	}
