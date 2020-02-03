@@ -254,6 +254,61 @@ int tick()
 			write( (unsigned int) lo, M);
 			CYCLES = 5;
 			break;
+
+		case 0x17: // undefined
+			break;
+
+		case 0x18: // CLC impl
+			set_flag('C', 0);
+			CYCLES = 1;
+			break;
+
+		case 0x19: // ORA abs, Y
+			lo = read(PC++);
+			hi = read(PC++);
+			address = hi << 8 + lo + Y;
+			M = read(address);
+			A |= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 3; // +1 if page boundary crossed
+			if (address >> 8 != hi) CYCLES += 1;
+			break;
+
+		case 0x1A: // undefined
+		case 0x1B:
+		case 0x1C:
+			break;
+
+		case 0x1D: // ORA abs, X
+			lo = read(PC++);
+			hi = read(PC++);
+			address = hi << 8 + lo + X;
+			M = read(address);
+
+			A |= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 3; // +1 if page boundary crossed
+			if (address >> 8 != hi) CYCLES += 1;
+			break;
+
+		case 0x1E: // ASL abs, X
+			lo = read(PC++);
+			hi = read(PC++);
+			address = hi << 8 + lo + X;
+			M = read(address);
+			set_flag('C', M >> 1);
+			M <<= 1;
+			set_flag('N', M >> 7);
+			set_flag('Z', M == 0);
+			write(address, M);
+			CYCLES = 6;
+			break;
+
+		case 0x1F: // undefined
+			break;
+
 	}
 
 	return 0; // instruction complete
