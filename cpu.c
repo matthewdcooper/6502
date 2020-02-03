@@ -309,6 +309,15 @@ int tick()
 		case 0x1F: // undefined
 			break;
 
+		case 0x20: // JSR abs
+			lo = read(PC++);
+			hi = read(PC++);
+			push(PC);
+			PC = hi << 8 + lo;
+			CYCLES = 5;
+			break;
+
+
 	}
 
 	return 0; // instruction complete
