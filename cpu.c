@@ -340,6 +340,94 @@ int tick()
 			set_flag('N', M >> 7);
 			set_flag('V', (M >> 6) & 1);
 			CYCLES = 2;
+			break;
+
+		case 0x25: // AND zpg
+			lo = read(PC++);
+			M = read( (unsigned int) lo );
+			A &= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 2;
+			break;
+
+		case 0x26: // ROL zpg
+			lo = read(PC++);
+			M = read( (unsigned int) lo );
+			set_flag('C', M >> 7);
+			M <<= 1;
+			M += get_flag('C');
+			set_flag('N', M >> 7);
+			set_flag('Z', M == 0);
+			CYCLES = 4;
+			break;
+
+		case 0x27: // undefined
+			break;
+
+		case 0x28: // SEC impl
+			set_flag('C', 1);
+			CYCLES = 1;
+			break;
+
+		case 0x29: // AND #
+			M = read(PC++);
+			A &= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 1;
+			break;
+
+		case 0x2A: // ROL A
+			set_flag('C', A >> 7);
+			A <<= 1;
+			A += get_flag('C');
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 1;
+			break;
+
+		case 0x2B: // undefined
+			break;
+
+		case 0x2C: // BIT abs
+			lo = read(PC++);
+			hi = read(PC++);
+			address = hi << 8 + lo;
+			M = read(address);
+			set_flag('N', M >> 7);
+			set_flag('V', (M >> 6) & 1);
+			set_flag('Z', A & M == 0);
+			CYCLES = 3;
+			break;
+
+		case 0x2D: // AND abs
+			lo = read(PC++);
+			hi = read(PC++);
+			address = hi << 8 + lo;
+			M = read(address);
+			A &= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 3;
+			break;
+
+		case 0x2E: // ROL abs
+			lo = read(PC++);
+			hi = read(PC++);
+			address = hi << 8 + lo;
+			M = read(address);
+			set_flag('C', M >> 7);
+			M <<= 1;
+			M += get_flag('C');
+			set_flag('N', M >> 7);
+			set_flag('Z', M == 0);
+			CYCLES = 5;
+			break;
+
+		case 0x2F: // undefined
+			break;
+
 
 
 	}
