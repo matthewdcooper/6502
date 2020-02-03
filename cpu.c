@@ -317,6 +317,30 @@ int tick()
 			CYCLES = 5;
 			break;
 
+		case 0x21: // AND X, ind
+			lo = read(PC++);
+			address = lo + X;
+			lo = read(address);
+			hi = read(address+1);
+			M = read(hi << 8 + lo);
+			A &= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 5;
+			break;
+
+		case 0x22: // undefined
+		case 0x23: 
+			break;
+
+		case 0x24: // BIT zpg
+			lo = read(PC++);
+			M = read( (unsigned int) lo );
+			set_flag('Z', A & M == 0);
+			set_flag('N', M >> 7);
+			set_flag('V', (M >> 6) & 1);
+			CYCLES = 2;
+
 
 	}
 
