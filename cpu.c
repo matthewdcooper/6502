@@ -214,7 +214,7 @@ int tick()
 			break;
 
 		case 0x11: // ORA ind, Y
-			address = read(read(PC++))
+			address = read(read(PC++));
 			lo = read(address);
 			hi = read(address+1);
 			address = hi << 8 + lo + Y;
@@ -241,6 +241,18 @@ int tick()
 			break;
 
 		default:
+			break;
+
+		case 0x16: // ASL zpg, X
+			lo = read(PC++);
+			lo += X;
+			M = read( (unsigned int) lo );
+			set_flag('C', M >> 7);
+			M <<= 1;
+			set_flag('N', M >> 7);
+			set_flag('Z', M == 0);
+			write( (unsigned int) lo, M);
+			CYCLES = 5;
 			break;
 	}
 
