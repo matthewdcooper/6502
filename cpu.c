@@ -222,8 +222,23 @@ int tick()
 			A |= M;
 			set_flag('N', A >> 7);
 			set_flag('Z', A == 0);
-			CYCLES = 4; // TODO: +1 if page boundary crossed
+			CYCLES = 4; // : +1 if page boundary crossed
 			if (address >> 8 != hi) CYCLES += 1;
+
+		case 0x12: // undefined
+		case 0x13:
+		case 0x14:
+			break;
+
+		case 0x15: // ORA zpg, X
+			lo = read(PC++);
+			lo += X;
+			M = read( (unsigned int) lo );
+			A |= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 3;
+			break;
 
 		default:
 			break;
