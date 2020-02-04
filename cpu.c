@@ -202,6 +202,7 @@ int tick()
 			break;
 
 		case 0x10: // BPL rel
+
 			data = read(PC++);
 			if (get_flag('N') == 0) {
 					hi = PC >> 8;
@@ -214,6 +215,7 @@ int tick()
 			break;
 
 		case 0x11: // ORA ind, Y
+
 			address = read(read(PC++));
 			lo = read(address);
 			hi = read(address+1);
@@ -264,6 +266,7 @@ int tick()
 			break;
 
 		case 0x19: // ORA abs, Y
+
 			lo = read(PC++);
 			hi = read(PC++);
 			address = hi << 8 + lo + Y;
@@ -285,7 +288,6 @@ int tick()
 			hi = read(PC++);
 			address = hi << 8 + lo + X;
 			M = read(address);
-
 			A |= M;
 			set_flag('N', A >> 7);
 			set_flag('Z', A == 0);
@@ -428,6 +430,114 @@ int tick()
 		case 0x2F: // undefined
 			break;
 
+		case 0x30: // BMI rel
+			data = read(PC++);
+			if (get_flag('N') == 1) {
+					hi = PC >> 8;
+					PC += data;
+					CYCLES = 2; // +1 if page boundary crossed
+					if (PC >> 8 != hi) CYCLES += 1;
+			} else {
+				CYCLES = 1; 
+			}
+			break;
+
+		case 0x31: // AND ind, Y
+			address = read(read(PC++));
+			lo = read(address);
+			hi = read(address+1);
+			address = hi << 8 + lo + Y;
+			M = read(address);
+			A &= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 4; // : +1 if page boundary crossed
+			if (address >> 8 != hi) CYCLES += 1;
+			break;
+
+		case 0x32: // undefined
+		case 0x33:
+		case 0x34:
+			break;
+
+		case 0x35: // AND zpg, X
+			lo = read(PC++);
+			lo += X;
+			M = read( (unsigned int) lo );
+			A &= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 3;
+			break;
+
+		case 0x36: // ROL zpg, X
+			lo = read(PC++);
+			lo += X;
+			M = read( (unsigned int) lo );
+			set_flag('C', M >> 7);
+			M <<= 1;
+			write( (unsigned int) lo, M);
+			set_flag('N', M >> 7);
+			set_flag('Z', M == 0);
+			CYCLES = 5;
+			break;
+
+		case 0x37: // undefined
+			break;
+
+		case 0x38: // SEC impl
+			set_flag('C', 1);
+			CYCLES = 1;
+			break;
+
+		case 0x39: // AND abs, Y
+			lo = read(PC++);
+			hi = read(PC++);
+			address = hi << 8 + lo + Y;
+			M = read(address);
+			A &= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 3; // +1 if page boundary crossed
+			if (address >> 8 != hi) CYCLES += 1;
+			break;
+
+		case 0x3A: // undefined
+		case 0x3B:
+		case 0x3C:
+			break;
+
+		case 0x3D: // AND abs, X
+			lo = read(PC++);
+			hi = read(PC++);
+			address = hi << 8 + lo + X;
+			M = read(address);
+			A &= M;
+			set_flag('N', A >> 7);
+			set_flag('Z', A == 0);
+			CYCLES = 3; // +1 if page boundary crossed
+			if (address >> 8 != hi) CYCLES += 1;
+			break;
+
+		case 0x3E: // ROL abs, X
+			lo = read(PC++);
+			hi = read(PC++);
+			address = hi << 8 + lo + X;
+			M = read(address);
+			set_flag('C', M >> 7);
+			M <<= 1;
+			write(address, M);
+			set_flag('N', M >> 7);
+			set_flag('Z', M == 0);
+			CYCLES = 6;
+			break;
+
+		case 0x3F: // undefined
+			break;
+
+
+
+		
 
 
 	}
